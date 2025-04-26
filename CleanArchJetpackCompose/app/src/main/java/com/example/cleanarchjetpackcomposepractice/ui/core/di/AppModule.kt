@@ -1,5 +1,8 @@
 package com.mmj.movieapp.core.di
 
+import android.content.Context
+import androidx.room.Room
+import com.example.cleanarchjetpackcomposepractice.ui.data.datasource.local.db.MovieDatabase
 import com.mmj.movieapp.core.network.MovieApi
 import com.mmj.movieapp.data.datasource.remote.MovieRemoteDataSource
 import com.mmj.movieapp.data.datasource.remote.MovieRemoteDataSourceImpl
@@ -9,6 +12,7 @@ import com.mmj.movieapp.domain.usecase.GetMoviesUseCase
 import dagger.Module
 import dagger.Provides
 import dagger.hilt.InstallIn
+import dagger.hilt.android.qualifiers.ApplicationContext
 import dagger.hilt.components.SingletonComponent
 import javax.inject.Singleton
 
@@ -27,9 +31,10 @@ object AppModule {
     @Singleton
     @Provides
     fun providesMovieRepository(
+        movieDatabase: MovieDatabase, // Use MovieDatabase here
         movieRemoteDataSource: MovieRemoteDataSource
     ): MovieRepository {
-        return MovieRepositoryImpl(movieRemoteDataSource)
+        return MovieRepositoryImpl(movieDatabase, movieRemoteDataSource)
     }
 
     @Singleton

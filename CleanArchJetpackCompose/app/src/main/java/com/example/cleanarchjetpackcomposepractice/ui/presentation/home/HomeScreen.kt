@@ -47,6 +47,7 @@ fun HomeScreen(
     viewModel: HomeViewModel = hiltViewModel()
 ) {
     val moviePagingItems: LazyPagingItems<Movie> = viewModel.moviesState.collectAsLazyPagingItems()
+
     Scaffold(
         topBar = {
             Row(
@@ -56,11 +57,7 @@ fun HomeScreen(
                     .background(MaterialTheme.colorScheme.primary),
                 verticalAlignment = Alignment.CenterVertically
             ) {
-                IconButton(
-                    onClick = {
-
-                    }
-                ) {
+                IconButton(onClick = { /* Open Drawer or something else */ }) {
                     Icon(
                         Icons.Default.Menu,
                         contentDescription = null,
@@ -78,17 +75,7 @@ fun HomeScreen(
                     textAlign = TextAlign.Center
                 )
 
-                IconButton(
-                    onClick = {
-                        if (mainViewModel.stateApp.theme == AppTheme.Light) {
-                            AppPreferences.setTheme(AppTheme.Dark)
-                            mainViewModel.onEvent(MainEvent.ThemeChange(AppTheme.Dark))
-                        } else {
-                            AppPreferences.setTheme(AppTheme.Light)
-                            mainViewModel.onEvent(MainEvent.ThemeChange(AppTheme.Light))
-                        }
-                    }
-                ) {
+                IconButton(onClick = { toggleTheme(mainViewModel) }) {
                     Icon(
                         painter = if (mainViewModel.stateApp.theme == AppTheme.Light)
                             painterResource(id = R.drawable.ic_dark_mode)
@@ -106,14 +93,18 @@ fun HomeScreen(
             modifier = Modifier.padding(it)
         ) {
             item { Spacer(modifier = Modifier.padding(4.dp)) }
+
             items(moviePagingItems.itemCount) { index ->
-                ItemMovie(
-                    itemEntity = moviePagingItems[index]!!,
-                    onClick = {
-                        navController.navigate(AppScreen.DetailsScreen.route)
-                    }
-                )
+                moviePagingItems[index]?.let { movie ->
+                    ItemMovie(
+                        itemEntity = movie,
+                        onClick = {
+                            navController.navigate(AppScreen.DetailsScreen.route)
+                        }
+                    )
+                }
             }
+
             moviePagingItems.apply {
                 when {
                     loadState.refresh is LoadState.Loading -> {
@@ -125,8 +116,9 @@ fun HomeScreen(
                         item {
                             ErrorMessage(
                                 modifier = Modifier.fillParentMaxSize(),
-                                message = error.error.localizedMessage!!,
-                                onClickRetry = { retry() })
+                                message = error.error.localizedMessage.orEmpty(),
+                                onClickRetry = { retry() }
+                            )
                         }
                     }
 
@@ -139,13 +131,25 @@ fun HomeScreen(
                         item {
                             ErrorMessage(
                                 modifier = Modifier,
-                                message = error.error.localizedMessage!!,
-                                onClickRetry = { retry() })
+                                message = error.error.localizedMessage.orEmpty(),
+                                onClickRetry = { retry() }
+                            )
                         }
                     }
                 }
             }
+
             item { Spacer(modifier = Modifier.padding(4.dp)) }
         }
     }
+}
+
+fun toggleTheme(mainViewModel: MainViewModel) {
+    val newTheme = if (mainViewModel.stateApp.theme == AppTheme.Light) {
+        AppTheme.Dark
+    } else {
+        AppTheme.Light
+    }
+    AppPreferences.setTheme(newTheme)
+    mainViewModel.onEvent(MainEvent.ThemeChange(newTheme))
 }

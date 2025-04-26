@@ -183,6 +183,7 @@ dependencies {
     implementation (libs.androidx.room.runtime)
     ksp (libs.androidx.room.compiler)
     implementation (libs.androidx.room.ktx)
+    implementation("androidx.room:room-paging:2.5.0")
 
     // Paper
     implementation("io.github.pilgr:paperdb:2.7.2")
